@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Shop - Danh Sách Sản Phẩm</title>
+  <meta name="description" content="Danh sách tất cả sản phẩm thủ công, nội thất và trang trí cao cấp tại Mini Shop.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <!-- Shared Modular Header -->
+  <div id="header-placeholder"></div>
+
+  <main class="container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="../index.html">Trang chủ</a></span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active">Sản phẩm</span>
+      </div>
+    </nav>
+
+    <!-- Main Products Page Layout -->
+    <section class="products-page-section">
+      <!-- Title Header -->
+      <div class="products-page-header">
+        <div class="products-header-top">
+          <div>
+            <h1 class="products-page-title">Danh sách sản phẩm</h1>
+            <p class="products-count-text" id="showingCountText">Hiển thị 1–10 trên 10 sản phẩm</p>
+          </div>
+
+          <!-- Toolbar (Search & Sort) -->
+          <div class="products-toolbar">
+            <div class="toolbar-search-box">
+              <input type="text" class="toolbar-search-input" id="toolbarSearchInput" placeholder="Tìm kiếm sản phẩm...">
+              <svg class="toolbar-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+              </svg>
+            </div>
+
+            <select class="toolbar-sort-select" id="toolbarSortSelect" aria-label="Sắp xếp sản phẩm">
+              <option value="newest">Sắp xếp: Mới nhất</option>
+              <option value="price-low">Giá: Thấp đến Cao</option>
+              <option value="price-high">Giá: Cao đến Thấp</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="products-page-layout">
+        <!-- Sidebar Filter Panel -->
+        <aside class="filter-sidebar">
+          <!-- Categories Filter -->
+          <div class="filter-group">
+            <h3 class="filter-header">Danh mục</h3>
+            <div class="filter-category-list" id="categoryFilterList">
+              <div class="filter-cat-item active" data-category="all">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  </svg>
+                  Tất cả sản phẩm
+                </span>
+                <span class="cat-count" id="cat-count-all">10</span>
+              </div>
+              <div class="filter-cat-item" data-category="noi-that">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                    <path d="M2 11a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4z"/>
+                  </svg>
+                  Nội thất
+                </span>
+                <span class="cat-count" id="cat-count-noi-that">3</span>
+              </div>
+              <div class="filter-cat-item" data-category="trang-tri">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  Trang trí
+                </span>
+                <span class="cat-count" id="cat-count-trang-tri">2</span>
+              </div>
+              <div class="filter-cat-item" data-category="nha-bep">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                  </svg>
+                  Nhà bếp
+                </span>
+                <span class="cat-count" id="cat-count-nha-bep">1</span>
+              </div>
+              <div class="filter-cat-item" data-category="den">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                  </svg>
+                  Đèn
+                </span>
+                <span class="cat-count" id="cat-count-den">2</span>
+              </div>
+              <div class="filter-cat-item" data-category="luu-tru">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+                  </svg>
+                  Lưu trữ
+                </span>
+                <span class="cat-count" id="cat-count-luu-tru">1</span>
+              </div>
+              <div class="filter-cat-item" data-category="van-phong">
+                <span class="option-text-group">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                  </svg>
+                  Văn phòng
+                </span>
+                <span class="cat-count" id="cat-count-van-phong">1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Price Filter -->
+          <div class="filter-group">
+            <h3 class="filter-header">Khoảng giá</h3>
+            <div class="filter-options-list">
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="radio" name="priceRange" value="all" checked>
+                  Tất cả mức giá
+                </span>
+              </label>
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="radio" name="priceRange" value="under-200k">
+                  Dưới 200.000đ
+                </span>
+              </label>
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="radio" name="priceRange" value="200k-500k">
+                  200.000đ - 500.000đ
+                </span>
+              </label>
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="radio" name="priceRange" value="500k-1500k">
+                  500.000đ - 1.500.000đ
+                </span>
+              </label>
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="radio" name="priceRange" value="over-1500k">
+                  Trên 1.500.000đ
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Availability Filter -->
+          <div class="filter-group">
+            <h3 class="filter-header">Tình trạng</h3>
+            <div class="filter-options-list">
+              <label class="filter-option-label">
+                <span class="option-text-group">
+                  <input type="checkbox" id="stockOnlyCheckbox" checked>
+                  Còn hàng
+                </span>
+              </label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Products Grid Container -->
+        <div class="products-grid-wrapper">
+          <div class="products-page-grid" id="products-page-grid">
+            <!-- Dynamically populated via products-page.js -->
+          </div>
+
+          <div class="load-more-container">
+            <button class="btn-load-more" onclick="alert('Đã tải tất cả sản phẩm hiện có')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+              </svg>
+              Tải thêm sản phẩm
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Modular Footer -->
+  <div id="footer-placeholder"></div>
+
+  <script src="../assets/js/products-data.js"></script>
+  <script src="../assets/js/cart-manager.js"></script>
+  <script src="../assets/js/wishlist-manager.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/products-page.js"></script>
+</body>
+</html>

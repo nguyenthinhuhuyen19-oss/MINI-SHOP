@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Shop - Chi Tiết Sản Phẩm</title>
+  <meta name="description" content="Chi tiết sản phẩm thủ công, nội thất và trang trí cao cấp tại Mini Shop.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <!-- Shared Modular Header -->
+  <div id="header-placeholder"></div>
+
+  <main class="container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="../index.html">Trang chủ</a></span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item"><a href="products.html" id="breadcrumbCategory">Trang trí</a></span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active" id="breadcrumbTitle">Tên sản phẩm</span>
+      </div>
+    </nav>
+
+    <!-- Main Product Detail Section -->
+    <section class="detail-main-section">
+      <div class="detail-grid-container">
+        <!-- Thumbnail Gallery Column -->
+        <div class="gallery-thumbs-col" id="galleryThumbsList">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Main Image Preview Column -->
+        <div class="gallery-main-col">
+          <div class="gallery-main-container">
+            <img id="galleryMainImg" src="" alt="Product Image Preview">
+          </div>
+        </div>
+
+        <!-- Main Product Info & Buy Action Column -->
+        <div class="product-info-col">
+          <div class="detail-badge-group">
+            <span class="badge-in-stock">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Còn hàng
+            </span>
+            <span class="badge-cat-tag" id="detailCategoryTag">Trang trí</span>
+          </div>
+
+          <h1 class="detail-product-title" id="detailProductTitle">Tên sản phẩm</h1>
+
+          <div class="rating-row">
+            <div class="star-group">
+              ★ ★ ★ ★ ★
+            </div>
+            <span class="review-count-text">(48 đánh giá)</span>
+          </div>
+
+          <div class="detail-price-box">
+            <span class="detail-current-price" id="detailCurrentPrice">499.000đ</span>
+            <span class="detail-old-price" id="detailOldPrice">699.000đ</span>
+            <span class="detail-discount-tag" id="detailDiscountTag">-29%</span>
+          </div>
+
+          <p class="detail-description-text" id="detailDescription">
+            Mô tả chi tiết sản phẩm thủ công tinh tế cho không gian sống hiện đại.
+          </p>
+
+          <div class="qty-selection-row">
+            <span class="qty-label">Số lượng:</span>
+            <div class="qty-control">
+              <button class="qty-btn" id="qtyBtnMinus" aria-label="Giảm số lượng">-</button>
+              <input type="text" class="qty-input" id="qtyInput" value="1" readonly>
+              <button class="qty-btn" id="qtyBtnPlus" aria-label="Tăng số lượng">+</button>
+            </div>
+          </div>
+
+          <div class="detail-actions-row">
+            <button class="btn-add-cart" id="btnAddToCart">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/>
+                <circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              Thêm vào giỏ hàng
+            </button>
+            <button class="btn-detail-wishlist" id="btnDetailWishlist">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+              Yêu thích
+            </button>
+          </div>
+
+          <div class="guarantee-badges-row">
+            <div class="guarantee-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <div>
+                <strong>Miễn phí vận chuyển</strong>
+                <div>Đơn từ 500.000đ</div>
+              </div>
+            </div>
+            <div class="guarantee-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <div>
+                <strong>30 ngày đổi trả</strong>
+                <div>Dễ dàng & nhanh chóng</div>
+              </div>
+            </div>
+            <div class="guarantee-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <div>
+                <strong>Thanh toán an toàn</strong>
+                <div>Bảo mật 100%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Specs & Delivery Sidebar Column -->
+        <div class="detail-sidebar-col">
+          <div class="detail-spec-card">
+            <h3 class="spec-card-title">Chi tiết sản phẩm</h3>
+            <div class="spec-table">
+              <div class="spec-row">
+                <span class="spec-label">Chất liệu:</span>
+                <span class="spec-value">Gốm sứ / Gỗ sồi</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Màu sắc:</span>
+                <span class="spec-value">Mộc mạc / Tự nhiên</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Kích thước:</span>
+                <span class="spec-value">Cao: 20cm, Rộng: 15cm</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Trọng lượng:</span>
+                <span class="spec-value">1.2 kg</span>
+              </div>
+              <div class="spec-row">
+                <span class="spec-label">Xuất xứ:</span>
+                <span class="spec-value">Việt Nam</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="delivery-info-card">
+            <h3 class="spec-card-title">Giao hàng & Đổi trả</h3>
+            <ul class="delivery-list">
+              <li>Thời gian giao hàng: 2–5 ngày làm việc</li>
+              <li>Giao hàng hỏa tốc: 1–2 ngày</li>
+              <li>Phí giao hàng: 30.000đ (Miễn phí đơn từ 500k)</li>
+            </ul>
+            <a href="#" class="more-delivery-link">Xem chi tiết chính sách giao hàng</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Products Section -->
+      <div class="related-products-section">
+        <div class="section-header">
+          <h2 class="section-title">Sản phẩm liên quan</h2>
+        </div>
+
+        <div class="products-grid" id="relatedProductsGrid" style="grid-template-columns: repeat(5, 1fr);">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Modular Footer -->
+  <div id="footer-placeholder"></div>
+
+  <script src="../assets/js/products-data.js"></script>
+  <script src="../assets/js/cart-manager.js"></script>
+  <script src="../assets/js/wishlist-manager.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/product-detail.js"></script>
+</body>
+</html>

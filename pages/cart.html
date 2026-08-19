@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Shop - Giỏ Hàng Của Bạn</title>
+  <meta name="description" content="Giỏ hàng và tóm tắt đơn hàng tại Mini Shop.">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+  <!-- Shared Modular Header -->
+  <div id="header-placeholder"></div>
+
+  <main class="container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item"><a href="../index.html">Trang chủ</a></span>
+        <span class="breadcrumb-separator">&gt;</span>
+        <span class="breadcrumb-item active">Giỏ hàng</span>
+      </div>
+    </nav>
+
+    <!-- Shopping Cart Section -->
+    <section class="cart-page-section">
+      <h1 class="cart-page-title">Giỏ hàng của bạn</h1>
+
+      <div id="cartPageContainer">
+        <!-- Dynamically rendered via cart-page.js -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Modular Footer -->
+  <div id="footer-placeholder"></div>
+
+  <script src="../assets/js/products-data.js"></script>
+  <script src="../assets/js/cart-manager.js"></script>
+  <script src="../assets/js/wishlist-manager.js"></script>
+  <script src="../assets/js/auth-manager.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/cart-page.js"></script>
+</body>
+</html>

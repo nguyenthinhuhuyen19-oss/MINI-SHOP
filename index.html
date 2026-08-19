@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Shop - Đồ Dùng & Trang Trí Cho Tổ Ấm</title>
+  <meta name="description" content="Mini Shop - Sản phẩm thủ công, nội thất và trang trí chất lượng cao cho tổ ấm của bạn.">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Shared Modular Header -->
+  <div id="header-placeholder"></div>
+
+  <main>
+    <!-- Hero Banner Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-banner" style="background-image: url('assets/images/banner/banner-trang-chu-mini-shop.webp');">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <h1 class="hero-title">Sống đẹp mỗi ngày<br>cùng Mini Shop</h1>
+            <p class="hero-subtitle">Sản phẩm chất lượng cho tổ ấm của bạn.</p>
+            <a href="pages/products.html" class="btn-hero">Mua sắm ngay</a>
+
+            <div class="hero-features">
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13" rx="2"/>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="feature-title">Giao hàng nhanh</div>
+                  <div class="feature-desc">Toàn quốc</div>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="feature-title">Bảo hành chính hãng</div>
+                  <div class="feature-desc">7 ngày đổi trả</div>
+                </div>
+              </div>
+
+              <div class="feature-item">
+                <div class="feature-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="feature-title">Hỗ trợ 24/7</div>
+                  <div class="feature-desc">Tư vấn tận tâm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Filter Section -->
+    <section class="categories-section">
+      <div class="container">
+        <div class="category-pills">
+          <button class="pill-btn active" data-category="all">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </span>
+            Tất cả
+          </button>
+          <button class="pill-btn" data-category="noi-that">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                <path d="M2 11a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4z"/>
+                <path d="M4 17v3M20 17v3"/>
+              </svg>
+            </span>
+            Nội thất
+          </button>
+          <button class="pill-btn" data-category="trang-tri">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </span>
+            Trang trí
+          </button>
+          <button class="pill-btn" data-category="nha-bep">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                <path d="M7 2v20"/>
+                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+              </svg>
+            </span>
+            Nhà bếp
+          </button>
+          <button class="pill-btn" data-category="den">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                <path d="M9 18h6M10 22h4"/>
+              </svg>
+            </span>
+            Đèn
+          </button>
+          <button class="pill-btn" data-category="van-phong">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+              </svg>
+            </span>
+            Văn phòng
+          </button>
+          <button class="pill-btn" data-category="luu-tru">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              </svg>
+            </span>
+            Lưu trữ
+          </button>
+          <button class="pill-btn" data-category="khac">
+            <span class="pill-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="19" cy="12" r="1"/>
+                <circle cx="5" cy="12" r="1"/>
+              </svg>
+            </span>
+            Khác
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products Grid Section -->
+    <section class="products-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Sản phẩm nổi bật</h2>
+          <a href="pages/products.html" class="see-all-link">
+            Xem tất cả
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="products-grid" id="featured-products-grid">
+          <!-- Dynamically populated via main.js -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Shared Modular Footer -->
+  <div id="footer-placeholder"></div>
+
+  <script src="assets/js/products-data.js"></script>
+  <script src="assets/js/cart-manager.js"></script>
+  <script src="assets/js/wishlist-manager.js"></script>
+  <script src="assets/js/auth-manager.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
