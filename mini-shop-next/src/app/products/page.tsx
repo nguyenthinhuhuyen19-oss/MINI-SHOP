@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { INITIAL_PRODUCTS_DATA } from "@/lib/productsData";
+import { INITIAL_PRODUCTS_DATA, fetchProductsFromSupabase, Product } from "@/lib/productsData";
 import ProductCard from "@/components/ProductCard";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useToast } from "@/context/ToastContext";
@@ -12,11 +12,20 @@ function ProductsContent() {
   const initialSearch = searchParams.get("search") || "";
   const { showToast } = useToast();
 
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS_DATA);
   const [currentCategory, setCurrentCategory] = useState("all");
   const [currentPriceRange, setCurrentPriceRange] = useState("all");
   const [inStockOnly, setInStockOnly] = useState(true);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [currentSort, setCurrentSort] = useState("newest");
+
+  useEffect(() => {
+    async function loadProducts() {
+      const data = await fetchProductsFromSupabase();
+      setProducts(data);
+    }
+    loadProducts();
+  }, []);
 
   useEffect(() => {
     const q = searchParams.get("search");
@@ -27,18 +36,18 @@ function ProductsContent() {
 
   const categoryCounts = useMemo(() => {
     return {
-      all: INITIAL_PRODUCTS_DATA.length,
-      "noi-that": INITIAL_PRODUCTS_DATA.filter((p) => p.category === "noi-that").length,
-      "trang-tri": INITIAL_PRODUCTS_DATA.filter((p) => p.category === "trang-tri").length,
-      "nha-bep": INITIAL_PRODUCTS_DATA.filter((p) => p.category === "nha-bep").length,
-      den: INITIAL_PRODUCTS_DATA.filter((p) => p.category === "den").length,
-      "luu-tru": INITIAL_PRODUCTS_DATA.filter((p) => p.category === "luu-tru").length,
-      "van-phong": INITIAL_PRODUCTS_DATA.filter((p) => p.category === "van-phong").length,
+      all: products.length,
+      "noi-that": products.filter((p) => p.category === "noi-that").length,
+      "trang-tri": products.filter((p) => p.category === "trang-tri").length,
+      "nha-bep": products.filter((p) => p.category === "nha-bep").length,
+      den: products.filter((p) => p.category === "den").length,
+      "luu-tru": products.filter((p) => p.category === "luu-tru").length,
+      "van-phong": products.filter((p) => p.category === "van-phong").length,
     };
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
-    let result = [...INITIAL_PRODUCTS_DATA];
+    let result = [...products];
 
     if (currentCategory !== "all") {
       result = result.filter((p) => p.category === currentCategory);
@@ -73,7 +82,7 @@ function ProductsContent() {
     }
 
     return result;
-  }, [currentCategory, currentPriceRange, searchQuery, currentSort]);
+  }, [products, currentCategory, currentPriceRange, searchQuery, currentSort]);
 
   return (
     <main className="container">

@@ -1,3 +1,5 @@
+import { supabase } from "@/lib/supabaseClient";
+
 export interface Product {
   id: number;
   name: string;
@@ -122,3 +124,46 @@ export const INITIAL_PRODUCTS_DATA: Product[] = [
     featured: false
   }
 ];
+
+export function mapSupabaseProduct(p: any): Product {
+  const categoryNames: Record<string, string> = {
+    "noi-that": "Nội thất",
+    "trang-tri": "Trang trí",
+    "nha-bep": "Nhà bếp",
+    "den": "Đèn",
+    "van-phong": "Văn phòng",
+    "luu-tru": "Lưu trữ"
+  };
+
+  const categoryId = p.category_id || p.category || "all";
+  const priceNum = Number(p.price) || 0;
+
+  return {
+    id: Number(p.id),
+    name: p.name || "",
+    category: categoryId,
+    categoryName: p.categories?.name || categoryNames[categoryId] || categoryId,
+    price: priceNum,
+    priceFormatted: `${priceNum.toLocaleString("vi-VN")}đ`,
+    description: p.description || "",
+    image: p.image || "/assets/images/products/noi-that-gia-dung/sofa-phong-khach.webp",
+    featured: Boolean(p.featured)
+  };
+}
+
+export async function fetchProductsFromSupabase(): Promise<Product[]> {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*, categories(name)")
+      .order("id", { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return INITIAL_PRODUCTS_DATA;
+    }
+
+    return data.map(mapSupabaseProduct);
+  } catch {
+    return INITIAL_PRODUCTS_DATA;
+  }
+}

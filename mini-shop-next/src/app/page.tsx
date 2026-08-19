@@ -1,12 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { INITIAL_PRODUCTS_DATA } from "@/lib/productsData";
+import { INITIAL_PRODUCTS_DATA, fetchProductsFromSupabase, Product } from "@/lib/productsData";
 import ProductCard from "@/components/ProductCard";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS_DATA);
+
+  useEffect(() => {
+    async function loadProducts() {
+      const data = await fetchProductsFromSupabase();
+      setProducts(data);
+    }
+    loadProducts();
+  }, []);
 
   const categories = [
     { id: "all", label: "Tất cả" },
@@ -18,7 +27,7 @@ export default function HomePage() {
     { id: "luu-tru", label: "Lưu trữ" },
   ];
 
-  const filteredProducts = INITIAL_PRODUCTS_DATA.filter((p) => {
+  const filteredProducts = products.filter((p) => {
     if (selectedCategory === "all") return p.featured;
     return p.category === selectedCategory;
   });
