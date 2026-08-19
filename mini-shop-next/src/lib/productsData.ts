@@ -156,7 +156,7 @@ export async function fetchProductsFromSupabase(): Promise<Product[]> {
     const { data, error } = await supabase
       .from("products")
       .select("*, categories(name)")
-      .order("id", { ascending: true });
+      .order("id", { ascending: false });
 
     if (error || !data || data.length === 0) {
       return INITIAL_PRODUCTS_DATA;
@@ -165,5 +165,70 @@ export async function fetchProductsFromSupabase(): Promise<Product[]> {
     return data.map(mapSupabaseProduct);
   } catch {
     return INITIAL_PRODUCTS_DATA;
+  }
+}
+
+export async function createProductInSupabase(productData: {
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  image?: string;
+}): Promise<boolean> {
+  try {
+    const newId = Date.now();
+    const defaultImage =
+      productData.image || "/assets/images/products/do-my-nghe/binh-gom-trang-tri.webp";
+
+    const { error } = await supabase.from("products").insert([
+      {
+        id: newId,
+        name: productData.name,
+        category_id: productData.category,
+        price: productData.price,
+        description: productData.description,
+        image: defaultImage,
+        featured: true,
+      },
+    ]);
+
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function updateProductInSupabase(
+  id: number,
+  productData: {
+    name: string;
+    category: string;
+    price: number;
+    description: string;
+  }
+): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name: productData.name,
+        category_id: productData.category,
+        price: productData.price,
+        description: productData.description,
+      })
+      .eq("id", id);
+
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteProductInSupabase(id: number): Promise<boolean> {
+  try {
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    return !error;
+  } catch {
+    return false;
   }
 }

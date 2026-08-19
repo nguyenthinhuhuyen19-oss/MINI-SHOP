@@ -1,9 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import AdminHeader from "@/components/admin/AdminHeader";
-import { INITIAL_PRODUCTS_DATA, Product } from "@/lib/productsData";
+import {
+  INITIAL_PRODUCTS_DATA,
+  Product,
+  fetchProductsFromSupabase,
+  createProductInSupabase,
+  updateProductInSupabase,
+  deleteProductInSupabase,
+} from "@/lib/productsData";
 import { useToast } from "@/context/ToastContext";
 
 export default function AdminProductsPage() {
@@ -11,11 +18,38 @@ export default function AdminProductsPage() {
 
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS_DATA);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [nameInput, setNameInput] = useState("");
   const [categoryInput, setCategoryInput] = useState("noi-that");
   const [priceInput, setPriceInput] = useState("");
   const [descInput, setDescInput] = useState("");
+  const [imageInput, setImageInput] = useState("/assets/images/products/do-my-nghe/binh-gom-trang-tri.webp");
+
+  const availableImages = [
+    { label: "Bình gốm Decor", url: "/assets/images/products/do-my-nghe/binh-gom-trang-tri.webp" },
+    { label: "Sofa 2 chỗ Nordic", url: "/assets/images/products/noi-that-gia-dung/sofa-phong-khach.webp" },
+    { label: "Bàn ăn gỗ Sồi", url: "/assets/images/products/noi-that-gia-dung/bo-ban-an-go.webp" },
+    { label: "Đèn thả trần Minimal", url: "/assets/images/products/do-my-nghe/den-tre-thu-cong.webp" },
+    { label: "Kệ gỗ trang trí", url: "/assets/images/products/noi-that-gia-dung/ke-go-trang-tri.webp" },
+    { label: "Giỏ mây lưu trữ", url: "/assets/images/products/do-thu-cong/gio-may-dan.webp" },
+    { label: "Khay gỗ hoa văn", url: "/assets/images/products/do-thu-cong/khay-go-hoa-van.webp" },
+    { label: "Tranh treo Macrame", url: "/assets/images/products/do-thu-cong/tranh-treo-macrame.webp" },
+    { label: "Chậu cây để bàn", url: "/assets/images/products/noi-that-gia-dung/chau-cay-de-ban.webp" },
+    { label: "Đèn lồng tre", url: "/assets/images/products/do-my-nghe/den-long-tre.webp" },
+  ];
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const data = await fetchProductsFromSupabase();
+    setProducts(data);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const categories = [
     { key: "noi-that", name: "Nội thất", count: products.filter((p) => p.category === "noi-that").length },
@@ -41,6 +75,7 @@ export default function AdminProductsPage() {
     setCategoryInput("noi-that");
     setPriceInput("");
     setDescInput("");
+    setImageInput("/assets/images/products/do-my-nghe/binh-gom-trang-tri.webp");
   };
 
   const handleEditClick = (product: Product) => {
@@ -49,17 +84,24 @@ export default function AdminProductsPage() {
     setCategoryInput(product.category);
     setPriceInput(product.price.toString());
     setDescInput(product.description);
+    setImageInput(product.image);
   };
 
-  const handleDeleteClick = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      showToast("Đã xóa sản phẩm khỏi hệ thống", "success", "check");
+  const handleDeleteClick = async (id: number, name: string) => {
+    const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${name}" khỏi cơ sở dữ liệu Supabase không?`);
+    if (!isConfirmed) return;
+
+    const ok = await deleteProductInSupabase(id);
+    if (ok) {
+      showToast(`Đã xóa sản phẩm "${name}" khỏi kho Supabase`, "success", "check");
+      await loadData();
       if (editingId === id) resetForm();
+    } else {
+      showToast("Xóa sản phẩm thất bại", "error", "info");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!nameInput.trim() || !priceInput.trim()) {
@@ -68,42 +110,41 @@ export default function AdminProductsPage() {
     }
 
     const price = Number(priceInput);
-    const catName = categoryNameMap[categoryInput] || "Khác";
 
+    setIsSaving(true);
     if (editingId) {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.id === editingId
-            ? {
-                ...p,
-                name: nameInput,
-                category: categoryInput,
-                categoryName: catName,
-                price: price,
-                priceFormatted: price.toLocaleString("vi-VN") + "đ",
-                description: descInput || p.description,
-              }
-            : p
-        )
-      );
-      showToast(`Đã cập nhật sản phẩm "${nameInput}"`, "success", "check");
-    } else {
-      const newProduct: Product = {
-        id: Date.now(),
-        name: nameInput,
+      const ok = await updateProductInSupabase(editingId, {
+        name: nameInput.trim(),
         category: categoryInput,
-        categoryName: catName,
-        price: price,
-        priceFormatted: price.toLocaleString("vi-VN") + "đ",
-        description: descInput || "Sản phẩm vừa được thêm mới vào hệ thống",
-        image: "/assets/images/products/do-my-nghe/binh-gom-trang-tri.webp",
-        featured: true,
-      };
-      setProducts((prev) => [newProduct, ...prev]);
-      showToast(`Đã thêm mới sản phẩm "${nameInput}"`, "success", "check");
-    }
+        price,
+        description: descInput.trim(),
+      });
 
-    resetForm();
+      if (ok) {
+        showToast(`Đã cập nhật sản phẩm "${nameInput}" trên Supabase`, "success", "check");
+        await loadData();
+        resetForm();
+      } else {
+        showToast("Cập nhật sản phẩm thất bại", "error", "info");
+      }
+    } else {
+      const ok = await createProductInSupabase({
+        name: nameInput.trim(),
+        category: categoryInput,
+        price,
+        description: descInput.trim(),
+        image: imageInput,
+      });
+
+      if (ok) {
+        showToast(`Đã thêm mới sản phẩm "${nameInput}" vào Supabase`, "success", "check");
+        await loadData();
+        resetForm();
+      } else {
+        showToast("Thêm mới sản phẩm thất bại", "error", "info");
+      }
+    }
+    setIsSaving(false);
   };
 
   return (
@@ -116,7 +157,9 @@ export default function AdminProductsPage() {
           {/* Products Table */}
           <div className="dashboard-card">
             <div className="card-head">
-              <h3 className="card-title">Danh Sách Sản Phẩm ({products.length})</h3>
+              <h3 className="card-title">
+                Danh Sách Sản Phẩm ({products.length}) {isLoading && <span style={{ fontSize: "0.8rem", color: "var(--gray-muted)" }}>(Đang tải...)</span>}
+              </h3>
               <button className="btn-primary-admin" style={{ width: "auto", padding: "8px 16px" }} onClick={resetForm}>
                 + Thêm Sản Phẩm
               </button>
@@ -158,7 +201,7 @@ export default function AdminProductsPage() {
                         <button className="btn-action-edit" onClick={() => handleEditClick(p)}>
                           Sửa
                         </button>
-                        <button className="btn-action-delete" onClick={() => handleDeleteClick(p.id)}>
+                        <button className="btn-action-delete" onClick={() => handleDeleteClick(p.id, p.name)}>
                           Xóa
                         </button>
                       </div>
@@ -173,13 +216,6 @@ export default function AdminProductsPage() {
           <div className="dashboard-card">
             <div className="card-head">
               <h3 className="card-title">Danh Mục Sản Phẩm ({categories.length})</h3>
-              <button
-                className="btn-primary-admin"
-                style={{ width: "auto", padding: "8px 16px", backgroundColor: "#2563eb" }}
-                onClick={() => showToast("Tính năng thêm danh mục mới sẽ ra mắt ở bản v2", "info", "info")}
-              >
-                + Thêm danh mục
-              </button>
             </div>
 
             <table className="admin-table">
@@ -189,7 +225,6 @@ export default function AdminProductsPage() {
                   <th>Tên danh mục</th>
                   <th>Số sản phẩm</th>
                   <th>Trạng thái</th>
-                  <th style={{ width: 100 }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,11 +235,6 @@ export default function AdminProductsPage() {
                     <td style={{ fontWeight: 700, color: "var(--primary)" }}>{c.count} món</td>
                     <td>
                       <span className="badge-visible">Active</span>
-                    </td>
-                    <td>
-                      <button className="btn-action-edit" onClick={() => showToast(`Xem danh mục ${c.name}`, "info", "info")}>
-                        Chi tiết
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -271,18 +301,19 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="admin-form-group">
-              <label className="admin-form-label">Hình ảnh sản phẩm</label>
-              <div className="upload-dropzone">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginBottom: 6 }}>
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <polyline points="21 15 16 10 5 21" />
-                </svg>
-                <div>Click to upload image</div>
-                <div style={{ fontSize: "0.72rem", color: "var(--gray-light)", marginTop: 2 }}>
-                  PNG, JPG up to 2MB
-                </div>
-              </div>
+              <label className="admin-form-label" htmlFor="productImage">Chọn hình ảnh có sẵn *</label>
+              <select
+                className="admin-form-select"
+                id="productImage"
+                value={imageInput}
+                onChange={(e) => setImageInput(e.target.value)}
+              >
+                {availableImages.map((img) => (
+                  <option key={img.url} value={img.url}>
+                    {img.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="admin-form-group">
@@ -299,8 +330,8 @@ export default function AdminProductsPage() {
               />
             </div>
 
-            <button type="submit" className="btn-primary-admin">
-              {editingId ? "Cập nhật sản phẩm" : "Lưu sản phẩm"}
+            <button type="submit" className="btn-primary-admin" disabled={isSaving}>
+              {isSaving ? "Đang lưu..." : editingId ? "Cập nhật sản phẩm" : "Lưu sản phẩm"}
             </button>
             <button type="button" className="btn-cancel-admin" onClick={resetForm}>
               Hủy / Thêm mới
