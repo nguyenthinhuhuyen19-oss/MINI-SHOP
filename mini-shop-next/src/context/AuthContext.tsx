@@ -17,6 +17,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,16 +26,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const formatUser = (supabaseUser: SupabaseUser): User => {
+  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User> => {
     const email = supabaseUser.email || "";
-    const name =
+    let role: "admin" | "customer" =
+      supabaseUser.user_metadata?.role ||
+      (email.toLowerCase().includes("admin") ? "admin" : "customer");
+
+    let name =
       supabaseUser.user_metadata?.full_name ||
       supabaseUser.user_metadata?.name ||
       email.split("@")[0] ||
       "Khách Hàng";
-    const role =
-      supabaseUser.user_metadata?.role ||
-      (email.toLowerCase().includes("admin") ? "admin" : "customer");
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role, full_name")
+        .eq("id", supabaseUser.id)
+        .maybeSingle();
+
+      if (profile) {
+        if (profile.role) {
+          role = profile.role as "admin" | "customer";
+        }
+        if (profile.full_name) {
+          name = profile.full_name;
+        }
+      } else {
+        await supabase.from("profiles").upsert([
+          {
+            id: supabaseUser.id,
+            email,
+            full_name: name,
+            role,
+          },
+        ]);
+      }
+    } catch (err) {
+      console.warn("Notice syncing profile table:", err);
+    }
 
     return {
       id: supabaseUser.id,
@@ -44,12 +74,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   };
 
+  const refreshProfile = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const u = await fetchUserProfile(session.user);
+        setCurrentUser(u);
+      }
+    } catch (err) {
+      console.error("Error refreshing user profile:", err);
+    }
+  };
+
   useEffect(() => {
     async function getInitialSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          setCurrentUser(formatUser(session.user));
+          const u = await fetchUserProfile(session.user);
+          setCurrentUser(u);
         } else {
           setCurrentUser(null);
         }
@@ -62,9 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     getInitialSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        setCurrentUser(formatUser(session.user));
+        const u = await fetchUserProfile(session.user);
+        setCurrentUser(u);
       } else {
         setCurrentUser(null);
       }
@@ -88,7 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        setCurrentUser(formatUser(data.user));
+        const u = await fetchUserProfile(data.user);
+        setCurrentUser(u);
       }
 
       return { success: true };
@@ -99,13 +144,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (name: string, email: string, password: string) => {
     try {
+      const isDefaultAdmin = email.toLowerCase().includes("admin");
+      const defaultRole: "admin" | "customer" = isDefaultAdmin ? "admin" : "customer";
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
         options: {
           data: {
             full_name: name.trim(),
-            role: email.toLowerCase().includes("admin") ? "admin" : "customer",
+            role: defaultRole,
           },
         },
       });
@@ -115,7 +163,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        setCurrentUser(formatUser(data.user));
+        const u = await fetchUserProfile(data.user);
+        setCurrentUser(u);
       }
 
       return { success: true };
@@ -135,7 +184,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ currentUser, loading, login, register, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

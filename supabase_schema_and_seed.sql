@@ -8,6 +8,7 @@ DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
 
 -- 2. TẠO BẢNG DANH MỤC (categories)
 CREATE TABLE categories (
@@ -53,14 +54,24 @@ CREATE TABLE order_items (
   price NUMERIC NOT NULL
 );
 
+-- 6. TẠO BẢNG HỒ SƠ & PHÂN VAI NGƯỜI DÙNG (profiles)
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  full_name TEXT,
+  role TEXT DEFAULT 'customer',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- TẮT RLS TRÊN TẤT CẢ CÁC BẢNG (Chưa bật khóa an toàn lúc này)
 ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
 ALTER TABLE products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
 
 -- ========================================================
--- 6. NẠP DỮ LIỆU BAN ĐẦU (SEED DATA)
+-- 7. NẠP DỮ LIỆU BAN ĐẦU (SEED DATA)
 -- ========================================================
 
 -- Nạp 6 Danh mục sản phẩm
