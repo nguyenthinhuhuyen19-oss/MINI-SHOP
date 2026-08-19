@@ -6,9 +6,11 @@
 /.next
 /*/.next
 
-# Environment variables
+# Environment variables & secrets
 .env*
 !.env.example
+.agents/mcp_config.json
+mcp_config.json
 
 # OS / Editor files
 .DS_Store
