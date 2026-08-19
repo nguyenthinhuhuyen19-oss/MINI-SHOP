@@ -1,8 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { User as SupabaseUser } from "@supabase/supabase-js";
 
 export interface User {
+  id: string;
   email: string;
   name: string;
   role: "admin" | "customer";
@@ -10,57 +13,129 @@ export interface User {
 
 interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, role?: "admin" | "customer") => void;
-  logout: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_KEY = "mini_shop_user";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const formatUser = (supabaseUser: SupabaseUser): User => {
+    const email = supabaseUser.email || "";
+    const name =
+      supabaseUser.user_metadata?.full_name ||
+      supabaseUser.user_metadata?.name ||
+      email.split("@")[0] ||
+      "Khách Hàng";
+    const role =
+      supabaseUser.user_metadata?.role ||
+      (email.toLowerCase().includes("admin") ? "admin" : "customer");
+
+    return {
+      id: supabaseUser.id,
+      email,
+      name,
+      role,
+    };
+  };
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(AUTH_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.user) {
-          setCurrentUser(parsed.user);
+    async function getInitialSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setCurrentUser(formatUser(session.user));
+        } else {
+          setCurrentUser(null);
         }
+      } catch (err) {
+        console.error("Error getting Supabase session:", err);
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error("Failed to parse user from localStorage", e);
     }
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser(formatUser(session.user));
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const login = (email: string, role: "admin" | "customer" = "customer") => {
-    const isTargetAdmin = email.toLowerCase().includes("admin") || role === "admin";
-    const user: User = {
-      email,
-      name: isTargetAdmin ? "Quản Trị Viên" : "Khách Hàng Thân Thiết",
-      role: isTargetAdmin ? "admin" : "customer",
-    };
-    setCurrentUser(user);
+  const login = async (email: string, password: string) => {
     try {
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ user, token: "mock_token_" + Date.now() }));
-    } catch (e) {
-      console.error("Failed to save user to localStorage", e);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        setCurrentUser(formatUser(data.user));
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || "Đã xảy ra lỗi khi đăng nhập" };
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
+  const register = async (name: string, email: string, password: string) => {
     try {
-      localStorage.removeItem(AUTH_KEY);
-    } catch (e) {
-      console.error("Failed to remove user from localStorage", e);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: {
+            full_name: name.trim(),
+            role: email.toLowerCase().includes("admin") ? "admin" : "customer",
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        setCurrentUser(formatUser(data.user));
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || "Đã xảy ra lỗi khi đăng ký" };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Error signing out:", err);
+    } finally {
+      setCurrentUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

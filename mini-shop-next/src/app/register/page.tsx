@@ -9,23 +9,36 @@ import { useToast } from "@/context/ToastContext";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { register } = useAuth();
   const { showToast } = useToast();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !password.trim()) {
       showToast("Vui lòng nhập đầy đủ thông tin", "error", "info");
       return;
     }
 
-    login(email, "customer");
-    showToast("Đăng ký tài khoản thành công! Bạn đã tự động đăng nhập.", "success", "check");
-    router.push("/");
+    if (password.trim().length < 6) {
+      showToast("Mật khẩu phải có ít nhất 6 ký tự", "error", "info");
+      return;
+    }
+
+    setIsSubmitting(true);
+    const res = await register(name, email, password);
+    setIsSubmitting(false);
+
+    if (res.success) {
+      showToast("Đăng ký tài khoản thành công! Bạn đã tự động đăng nhập.", "success", "check");
+      router.push("/");
+    } else {
+      showToast(res.error || "Đăng ký thất bại, vui lòng thử lại.", "error", "info");
+    }
   };
 
   return (
@@ -84,8 +97,13 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <button type="submit" className="btn-checkout" style={{ marginTop: 24, padding: 14, fontSize: "1rem" }}>
-                Đăng Ký Tài Khoản
+              <button
+                type="submit"
+                className="btn-checkout"
+                disabled={isSubmitting}
+                style={{ marginTop: 24, padding: 14, fontSize: "1rem" }}
+              >
+                {isSubmitting ? "Đang tạo tài khoản..." : "Đăng Ký Tài Khoản"}
               </button>
             </form>
 
