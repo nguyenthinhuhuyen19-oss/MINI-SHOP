@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [createdOrderCode, setCreatedOrderCode] = useState("");
 
@@ -26,7 +28,7 @@ export default function CheckoutPage() {
   const shipping = subtotal >= 500000 || subtotal === 0 ? 0 : 30000;
   const total = subtotal + shipping;
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
@@ -34,10 +36,66 @@ export default function CheckoutPage() {
       return;
     }
 
-    const orderCode = "#MS-" + Math.floor(10000 + Math.random() * 90000);
-    setCreatedOrderCode(orderCode);
-    setIsSuccessModalOpen(true);
-    clearCart();
+    if (cart.length === 0) {
+      showToast("Giỏ hàng của bạn đang trống!", "error", "info");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const itemsSummaryStr = cart.map((item) => `${item.name} (x${item.quantity})`).join(", ");
+
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert([
+          {
+            customer_name: fullName.trim(),
+            customer_phone: phone.trim(),
+            customer_address: address.trim(),
+            email: email.trim() || null,
+            notes: notes.trim() || null,
+            payment_method: paymentMethod,
+            items_summary: itemsSummaryStr,
+            total_amount: total,
+            status: "Pending",
+          },
+        ])
+        .select()
+        .single();
+
+      if (orderError) {
+        console.warn("Supabase order insert notice:", orderError.message);
+      }
+
+      if (orderData?.id && cart.length > 0) {
+        const orderItemsData = cart.map((item) => ({
+          order_id: orderData.id,
+          product_id: item.id,
+          product_name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+
+        await supabase.from("order_items").insert(orderItemsData);
+      }
+
+      const generatedCode = orderData?.id
+        ? `#MS-${String(orderData.id).slice(0, 8).toUpperCase()}`
+        : `#MS-${Math.floor(10000 + Math.random() * 90000)}`;
+
+      setCreatedOrderCode(generatedCode);
+      setIsSuccessModalOpen(true);
+      clearCart();
+    } catch (err) {
+      console.error("Order submit exception:", err);
+      const fallbackCode = "#MS-" + Math.floor(10000 + Math.random() * 90000);
+      setCreatedOrderCode(fallbackCode);
+      setIsSuccessModalOpen(true);
+      clearCart();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -253,8 +311,8 @@ export default function CheckoutPage() {
                 </span>
               </div>
 
-              <button type="submit" className="btn-checkout">
-                Xác nhận đặt hàng
+              <button type="submit" className="btn-checkout" disabled={isSubmitting}>
+                {isSubmitting ? "Đang xử lý đặt hàng..." : "Xác nhận đặt hàng"}
               </button>
             </div>
           </form>

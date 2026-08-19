@@ -34,6 +34,10 @@ CREATE TABLE orders (
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
   customer_address TEXT NOT NULL,
+  email TEXT,
+  notes TEXT,
+  payment_method TEXT DEFAULT 'cod',
+  items_summary TEXT,
   total_amount NUMERIC NOT NULL,
   status TEXT DEFAULT 'Pending',
   created_at TIMESTAMPTZ DEFAULT NOW()
