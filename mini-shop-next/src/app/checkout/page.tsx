@@ -6,12 +6,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumb";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, getCartTotal, clearCart } = useCart();
+  const { currentUser } = useAuth();
   const { showToast } = useToast();
 
   const [fullName, setFullName] = useState("");
@@ -50,6 +52,7 @@ export default function CheckoutPage() {
         .from("orders")
         .insert([
           {
+            user_id: currentUser?.id || null,
             customer_name: fullName.trim(),
             customer_phone: phone.trim(),
             customer_address: address.trim(),

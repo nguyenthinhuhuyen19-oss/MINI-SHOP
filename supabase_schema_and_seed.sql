@@ -1,14 +1,14 @@
 -- ========================================================
--- KỊCH BẢN TẠO BẢNG VÀ NẠP DỮ LIỆU MẪU DỰ ÁN MINI-SHOP (SUPABASE)
--- RLS (Row Level Security) tạm thời tắt theo yêu cầu.
+-- KỊCH BẢN TẠO BẢNG, NẠP DỮ LIỆU VÀ CẤU HÌNH RLS DỰ ÁN MINI-SHOP (SUPABASE)
 -- ========================================================
 
--- 1. XÓA BẢNG CŨ NẾU ĐÃ TỒN TẠI (RESET)
+-- 1. XÓA BẢNG VÀ HÀM CỦ NẾU ĐÃ TỒN TẠI (RESET)
 DROP TABLE IF EXISTS order_items CASCADE;
 DROP TABLE IF EXISTS orders CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
+DROP FUNCTION IF EXISTS is_admin CASCADE;
 
 -- 2. TẠO BẢNG DANH MỤC (categories)
 CREATE TABLE categories (
@@ -29,9 +29,19 @@ CREATE TABLE products (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. TẠO BẢNG ĐƠN HÀNG (orders)
+-- 4. TẠO BẢNG HỒ SƠ NGƯỜI DÙNG & PHÂN VAI (profiles)
+CREATE TABLE profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  full_name TEXT,
+  role TEXT DEFAULT 'customer',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. TẠO BẢNG ĐƠN HÀNG (orders)
 CREATE TABLE orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   customer_name TEXT NOT NULL,
   customer_phone TEXT NOT NULL,
   customer_address TEXT NOT NULL,
@@ -44,7 +54,7 @@ CREATE TABLE orders (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 5. TẠO BẢNG CHI TIẾT ĐƠN HÀNG (order_items)
+-- 6. TẠO BẢNG CHI TIẾT ĐƠN HÀNG (order_items)
 CREATE TABLE order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
@@ -54,24 +64,104 @@ CREATE TABLE order_items (
   price NUMERIC NOT NULL
 );
 
--- 6. TẠO BẢNG HỒ SƠ & PHÂN VAI NGƯỜI DÙNG (profiles)
-CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  full_name TEXT,
-  role TEXT DEFAULT 'customer',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- TẮT RLS TRÊN TẤT CẢ CÁC BẢNG (Chưa bật khóa an toàn lúc này)
-ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
-ALTER TABLE products DISABLE ROW LEVEL SECURITY;
-ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items DISABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
+-- ========================================================
+-- 7. HÀM HỖ TRỢ KIỂM TRA QUYỀN ADMIN (is_admin)
+-- ========================================================
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ========================================================
--- 7. NẠP DỮ LIỆU BAN ĐẦU (SEED DATA)
+-- 8. KÍCH HOẠT KHÓA AN TOÀN RLS (ROW LEVEL SECURITY)
+-- ========================================================
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+
+-- --------------------------------------------------------
+-- POLICIES BẢNG categories
+-- --------------------------------------------------------
+CREATE POLICY "Anyone can view categories"
+  ON categories FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admins can manage categories"
+  ON categories FOR ALL
+  USING (is_admin());
+
+-- --------------------------------------------------------
+-- POLICIES BẢNG products
+-- --------------------------------------------------------
+CREATE POLICY "Anyone can view products"
+  ON products FOR SELECT
+  USING (true);
+
+CREATE POLICY "Admins can manage products"
+  ON products FOR ALL
+  USING (is_admin());
+
+-- --------------------------------------------------------
+-- POLICIES BẢNG profiles
+-- --------------------------------------------------------
+CREATE POLICY "Users can view own profile or admins view all"
+  ON profiles FOR SELECT
+  USING (auth.uid() = id OR is_admin());
+
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users update own profile, admin updates any"
+  ON profiles FOR UPDATE
+  USING (auth.uid() = id OR is_admin());
+
+-- --------------------------------------------------------
+-- POLICIES BẢNG orders
+-- --------------------------------------------------------
+CREATE POLICY "Anyone can insert orders"
+  ON orders FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Users and admins can view orders"
+  ON orders FOR SELECT
+  USING (is_admin() OR (auth.uid() IS NOT NULL AND user_id = auth.uid()));
+
+CREATE POLICY "Admins can update orders"
+  ON orders FOR UPDATE
+  USING (is_admin());
+
+CREATE POLICY "Admins can delete orders"
+  ON orders FOR DELETE
+  USING (is_admin());
+
+-- --------------------------------------------------------
+-- POLICIES BẢNG order_items
+-- --------------------------------------------------------
+CREATE POLICY "Anyone can insert order_items"
+  ON order_items FOR INSERT
+  WITH CHECK (true);
+
+CREATE POLICY "Users and admins can view order_items"
+  ON order_items FOR SELECT
+  USING (is_admin() OR EXISTS (
+    SELECT 1 FROM orders WHERE orders.id = order_items.order_id AND (orders.user_id = auth.uid() OR auth.role() = 'anon')
+  ));
+
+CREATE POLICY "Admins can manage order_items"
+  ON order_items FOR ALL
+  USING (is_admin());
+
+-- ========================================================
+-- 9. NẠP DỮ LIỆU BAN ĐẦU (SEED DATA)
 -- ========================================================
 
 -- Nạp 6 Danh mục sản phẩm
